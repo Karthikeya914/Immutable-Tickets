@@ -1,34 +1,33 @@
 import com.example.tickets.IncidentTicket;
 import com.example.tickets.TicketService;
 
+import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Starter demo that shows why mutability is risky.
- *
- * After refactor:
- * - direct mutation should not compile (no setters)
- * - external modifications to tags should not affect the ticket
- * - service "updates" should return a NEW ticket instance
- */
 public class TryIt {
 
     public static void main(String[] args) {
         TicketService service = new TicketService();
 
-        IncidentTicket t = service.createTicket("TCK-1001", "reporter@example.com", "Payment failing on checkout");
-        System.out.println("Created: " + t);
+        List<String> tags = new ArrayList<>();
+        tags.add("PAYMENT");
 
-        // Demonstrate post-creation mutation through service
-        service.assign(t, "agent@example.com");
-        service.escalateToCritical(t);
-        System.out.println("\nAfter service mutations: " + t);
+        IncidentTicket t1 = service.create(
+                "TCK-1001",
+                "reporter@example.com",
+                "Payment failing on checkout",
+                "Checkout page throws error",
+                tags
+        );
 
-        // Demonstrate external mutation via leaked list reference
-        List<String> tags = t.getTags();
+        System.out.println("Created: " + t1);
+        IncidentTicket t2 = service.assign(t1, "agent@example.com");
+        IncidentTicket t3 = service.escalate(t2);
+
+        System.out.println("\nAfter service updates (new ticket): " + t3);
+
+      
         tags.add("HACKED_FROM_OUTSIDE");
-        System.out.println("\nAfter external tag mutation: " + t);
-
-        // Starter compiles; after refactor, you should redesign updates to create new objects instead.
+        System.out.println("\nAfter external tag mutation attempt: " + t3);
     }
 }
